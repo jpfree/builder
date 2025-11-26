@@ -56,6 +56,7 @@ jobs:
 
           NAME=${{matrix.platform}}
           bash builder.sh ${NAME}
+          sh repack.sh ssc337 ssc337_lite_h3c-tc2101-nor a1113 a1113a1113
           cd openipc
 
           TIME=$(date -d @${SECONDS} +%M:%S)
