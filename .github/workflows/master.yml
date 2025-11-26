@@ -20,18 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         platform:          
-          - ssc337_lite_h3c-tc2101
-          
-          # FPV
-          - gk7205v300_fpv
-          - ssc30kq_fpv
-
-          # LTE
-          - gk7205v300_lte
-
-          # Venc
-          - gk7205v300_venc
-
+          - ssc337_lite_h3c-tc2101   
 
     steps:
       - name: Checkout source
