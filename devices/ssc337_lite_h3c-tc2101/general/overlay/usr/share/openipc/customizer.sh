@@ -22,4 +22,6 @@ fw_setenv wlandev rtl8188fu-generic
 fw_setenv wlanssid a1113
 fw_setenv wlanpass a1113a1113
 
+fw_setenv sensor jxq03
+
 exit 0
