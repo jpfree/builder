@@ -24,7 +24,12 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4  # Also update this if you're using an older version
+        with:
+          node-version: 24  # or 22/24 as needed
 
       - name: Prepare firmware
         run: |
