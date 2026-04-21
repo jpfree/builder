@@ -1,25 +1,3 @@
-name: Build
-
-on:
-  workflow_dispatch:
-    inputs:
-      platform:
-        description: Platform
-        required: false
-
-env:
-  TAG_NAME: latest
-
-jobs:
-  buildroot:
-    name: Firmware
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-          - ssc337_lite_h3c-tc2101
-
     steps:
       - name: Checkout source
         uses: actions/checkout@v6
@@ -28,15 +6,23 @@ jobs:
         run: |
           echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
           echo CACHE_DATE=$(date +%m) >> ${GITHUB_ENV}
-          INPUT=${{inputs.platform}}
-          MATRIX=$(echo ${{matrix.platform}} | cut -d_ -f1)
-          if [ -z ${INPUT} ] || [ ${INPUT} = ${MATRIX} ]; then
-            echo RUN=${MATRIX} >> ${GITHUB_ENV}
+
+          INPUT_PLATFORM="${{ inputs.platform }}"
+          MATRIX_PLATFORM="${{ matrix.platform }}"
+
+          echo "Input platform : ${INPUT_PLATFORM}"
+          echo "Matrix platform: ${MATRIX_PLATFORM}"
+
+          if [ -z "$INPUT_PLATFORM" ] || [ "$INPUT_PLATFORM" = "$MATRIX_PLATFORM" ]; then
+            echo "RUN=true" >> ${GITHUB_ENV}
+            echo "✅ Will build platform: ${MATRIX_PLATFORM}"
+          else
+            echo "⏭️ Skipping: input '${INPUT_PLATFORM}' does not match '${MATRIX_PLATFORM}'"
           fi
 
       - name: Setup ccache
         if: env.RUN
-        uses: actions/cache@v4   # v4 is still fine (Node 24 compatible)
+        uses: actions/cache@v4
         with:
           path: /tmp/ccache
           key: ${{matrix.platform}}-${{env.CACHE_DATE}}
@@ -81,7 +67,7 @@ jobs:
 
       - name: Upload firmware
         if: env.NORFW || env.NANDFW
-        uses: softprops/action-gh-release@v3   # ← Updated to v3 (Node 24)
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: latest
           files: |
