@@ -1,4 +1,5 @@
 name: Build
+
 on:
   workflow_dispatch:
     inputs:
@@ -13,12 +14,11 @@ jobs:
   buildroot:
     name: Firmware
     runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
-        platform:          
-          - ssc337_lite_h3c-tc2101   
+        platform:
+          - ssc337_lite_h3c-tc2101
 
     steps:
       - name: Checkout source
@@ -36,7 +36,7 @@ jobs:
 
       - name: Setup ccache
         if: env.RUN
-        uses: actions/cache@v4
+        uses: actions/cache@v4   # v4 is still fine (Node 24 compatible)
         with:
           path: /tmp/ccache
           key: ${{matrix.platform}}-${{env.CACHE_DATE}}
@@ -48,19 +48,15 @@ jobs:
           export GIT_BRANCH=${GITHUB_REF_NAME}
           echo GIT_HASH=${GIT_HASH} >> ${GITHUB_ENV}
           echo GIT_BRANCH=${GIT_BRANCH} >> ${GITHUB_ENV}
-
           mkdir -p /tmp/ccache
           ln -s /tmp/ccache ${HOME}/.ccache
-
           NAME=${{matrix.platform}}
           bash builder.sh ${NAME}
           sh repack.sh ssc337 ssc337_lite_h3c-tc2101-nor a1113 a1113a1113
           cd openipc
-
           TIME=$(date -d @${SECONDS} +%M:%S)
           echo TIME=${TIME} >> ${GITHUB_ENV}
           COMMON=$(echo ${NAME} | awk -F_ '{print NF-1}')
-
           NORFW=$(find output/images -name openipc*nor*)
           if [ ! -z ${NORFW} ]; then
             if [ ${COMMON} -eq 1 ]; then
@@ -70,7 +66,6 @@ jobs:
               echo NORFW=${NAME}-nor.tgz >> ${GITHUB_ENV}
             fi
           fi
-
           NANDFW=$(find output/images -name openipc*nand*)
           if [ ! -z ${NANDFW} ]; then
             if [ ${COMMON} -eq 1 ]; then
@@ -80,14 +75,13 @@ jobs:
               echo NANDFW=${NAME}-nand.tgz >> ${GITHUB_ENV}
             fi
           fi
-
           if [ -z ${NORFW} ] && [ -z ${NANDFW} ]; then
             exit 1
           fi
 
       - name: Upload firmware
         if: env.NORFW || env.NANDFW
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3   # ← Updated to v3 (Node 24)
         with:
           tag_name: latest
           files: |
